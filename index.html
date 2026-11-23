@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="記帳">
+<meta name="theme-color" content="#0b1026">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>記帳</title>
+<style>
+:root{--tx:#eef1ff;--mu:#9aa3d0;--ln:#ffffff1f;--cd:#ffffff0f;--ac:#a8c4ff;--up:#7be0b0;--dn:#ff8fa3;--wa:#ffd27a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;color:var(--tx);font:700 16px/1.5 "Songti TC","STSong","Noto Serif TC","Source Han Serif TC","PMingLiU","SimSun",serif;background:#0b1026}
+body::after{content:"";position:fixed;inset:0;z-index:-2;background:linear-gradient(165deg,#060a1d 0%,#15144a 55%,#2d1a5a 100%)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.85;background:
+radial-gradient(1px 1px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 90px 120px,#cfd8ff,transparent),
+radial-gradient(1px 1px at 160px 60px,#fff,transparent),radial-gradient(1px 1px at 230px 180px,#e8e0ff,transparent),
+radial-gradient(1.5px 1.5px at 300px 90px,#fff,transparent),radial-gradient(1px 1px at 60px 200px,#fff,transparent);background-size:320px 230px}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:#0b1026cc;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+header h1{margin:0;font-size:21px;font-weight:900;flex:1}
+#stat{font-size:12px;color:var(--mu)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+main{padding:4px 14px calc(env(safe-area-inset-bottom) + 90px)}
+section[hidden]{display:none}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;padding:8px 8px calc(env(safe-area-inset-bottom) + 6px);background:#0b1026e6;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--ln)}
+nav button{flex:1;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mu);padding:4px 0}
+nav button.on{color:var(--ac)}
+.card{background:var(--cd);border:1px solid var(--ln);border-radius:16px;padding:12px;margin:10px 0}
+.grp{margin:16px 2px 6px;font-size:13px;color:var(--mu)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.row.r3{grid-template-columns:.9fr 1fr .9fr}
+.row.ex{grid-template-columns:78px 1fr .9fr 30px}
+.row>span{font-size:15px}
+input,select{width:100%;min-width:0;font:inherit;font-size:16px;color:var(--tx);background:#ffffff12;border:1px solid var(--ln);border-radius:10px;padding:9px 10px;outline:0}
+input:focus,select:focus{border-color:var(--ac)}
+input.a{text-align:right}
+select option{color:#111}
+.plus{display:block;margin:14px auto 4px;width:52px;height:52px;border-radius:26px;background:linear-gradient(135deg,#6c8cff,#a46bff);font-size:30px;line-height:1;box-shadow:0 4px 18px #6c8cff55}
+.x{color:var(--mu);font-size:18px}
+.mut{color:var(--mu);font-size:13px}
+.pills{display:flex;gap:6px;overflow-x:auto;padding:6px 0}
+.pills button{flex:none;padding:6px 12px;border-radius:99px;border:1px solid var(--ln);font-size:14px;color:var(--mu)}
+.pills button.on{background:#a8c4ff26;color:var(--tx);border-color:var(--ac)}
+svg.ch{width:100%;height:auto;display:block}
+.lg{display:flex;align-items:center;gap:8px;font-size:14px;padding:3px 0}
+.lg i{width:10px;height:10px;border-radius:5px;flex:none}.lg b{flex:1;font-weight:400}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 4px;text-align:right;border-bottom:1px solid var(--ln)}
+th{color:var(--mu);font-weight:400}th:nth-child(-n+2),td:nth-child(-n+2){text-align:left}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal div{text-align:center;font-size:12px;color:var(--mu)}
+.cal button{aspect-ratio:1/1.15;border-radius:10px;background:var(--cd);border:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;gap:1px;padding:0}
+.cal button small{font-size:10px}.cal button.t{border-color:var(--ac)}.cal button.e{visibility:hidden}
+.mh{display:flex;align-items:center;justify-content:space-between;font-size:18px;margin:6px 0}
+.mh button{padding:6px 14px;font-size:22px;color:var(--ac)}
+.brow{display:grid;grid-template-columns:1fr 68px 84px 26px;gap:6px;margin-bottom:8px}
+.bar{height:8px;border-radius:4px;background:#ffffff1a;overflow:hidden}.bar i{display:block;height:100%;border-radius:4px;width:0}
+.bt{font-size:13px;margin-top:6px;color:var(--mu)}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.wr{display:flex;align-items:center;gap:12px;margin:8px 0;transition:opacity .3s}
+.wr input[type=checkbox]{width:22px;height:22px;padding:0;flex:none;accent-color:#a8c4ff}
+.wr .wt{flex:1}
+.wadd{display:grid;grid-template-columns:1fr 92px 46px;gap:8px;margin:8px 0}
+.wadd button{border-radius:10px;background:linear-gradient(135deg,#6c8cff,#a46bff);font-size:24px}
+.ghost{padding:8px 14px;border:1px solid var(--ln);border-radius:12px;color:var(--ac);font-size:15px}
+#set{position:fixed;inset:0;z-index:20;background:#060a1dd9;display:flex;align-items:center;justify-content:center;padding:20px}
+#set[hidden]{display:none}#set .card{background:#171a4a;width:100%;max-width:420px}
+#set label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+</style>
+</head>
+<body>
+<header><h1 id="ttl"></h1><span id="stat"></span>
+<button id="gear" aria-label="設定"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></button></header>
+<main>
+<section id="v-today"><div class="mut" id="todayDate"></div><div id="todayForm"></div></section>
+<section id="v-stats" hidden>
+ <div class="pills" id="rng"><button data-k="m" class="on">本月</button><button data-k="m2">本月+上月</button><button data-k="q">本季</button><button data-k="s">本學期</button></div>
+ <div class="card"><div class="mut">總盈餘走勢</div><div id="line"></div></div>
+ <div class="card"><div id="pie"></div></div>
+ <div class="card"><div class="mut" style="margin-bottom:4px">支出排名</div><div id="rank"></div></div>
+</section>
+<section id="v-cal" hidden>
+ <div class="mh"><button id="pm">‹</button><span id="cmt"></span><button id="nm">›</button></div>
+ <div class="cal" id="calg"></div>
+</section>
+<section id="v-edit" hidden>
+ <div class="mh"><button class="ghost" id="back">‹ 儲存並返回</button><span id="editTitle"></span></div>
+ <div id="editForm"></div>
+</section>
+<section id="v-wish" hidden>
+ <div class="wadd"><input id="wn" placeholder="想買的東西"><input id="wp" class="a" type="number" inputmode="decimal" placeholder="預估價"><button id="wa" aria-label="新增">+</button></div>
+ <div class="mut" id="wsum"></div><div id="wList"></div>
+</section>
+<section id="v-budget" hidden>
+ <div class="card" id="bsum"></div><div id="bList"></div>
+ <button class="plus" id="badd">+</button><datalist id="cats"></datalist>
+</section>
+</main>
+<nav>
+<button data-v="today" class="on"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>記帳</button>
+<button data-v="stats"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/></svg>統計</button>
+<button data-v="cal"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>月曆</button>
+<button data-v="wish"><svg class="i" viewBox="0 0 24 24"><path d="M4 7l2 2 3-3M4 16l2 2 3-3M13 8h7M13 17h7"/></svg>待買</button>
+<button data-v="budget"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>預算</button>
+</nav>
+<div id="set" hidden><div class="card">
+ <b>同步設定</b>
+ <label>Apps Script 網址（結尾是 /exec）</label><input id="cu" placeholder="https://script.google.com/macros/s/.../exec">
+ <label>密碼（需與 Code.gs 的 TOKEN 相同）</label><input id="ct" type="password">
+ <div style="display:flex;gap:8px;margin-top:14px"><button class="ghost" id="csave" style="flex:1">儲存並同步</button><button class="ghost" id="cclose" style="color:var(--mu)">關閉</button></div>
+</div></div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const L=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+let days=L('days',{}),dirty=L('dirty',[]),budget=L('budget',[]),bDirty=L('bDirty',false),cfg=L('cfg',{url:'',token:''}),wish=L('wish',[]),wDirty=L('wDirty',false);
+const p2=n=>String(n).padStart(2,'0'),ymd=d=>`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sg=i=>i.t==='i'?i.a:i.t==='e'?-i.a:0;
+const flat=()=>Object.entries(days).flatMap(([d,a])=>a.map(i=>({...i,d})));
+const sum=a=>a.reduce((s,i)=>s+i.a,0);
+const FX=[{g:'支出',c:'吃飯'},{c:'屯糧'},{c:'日用'},{c:'健康'},{c:'玩樂'},{c:'其他',s:1},{c:'特定',s:1},
+{g:'收入',c:'月收入',t:'i'},{c:'零用錢',t:'i'},{c:'其他/特定收入1',t:'i',s:1},{c:'其他/特定收入2',t:'i',s:1}];
+const FN=FX.map(x=>x.c);
+const PAL=['#8ab4ff','#b794ff','#ff9ec4','#ffd27a','#7be0b0','#6fd6e8','#ff9a76','#c3d36a','#d0a2f7'];
+
+/* ---------- 表單 ---------- */
+const exRow=(t,c,a)=>`<div class="row ex"><select class="t"><option value="e"${t==='e'?' selected':''}>支出</option><option value="i"${t==='i'?' selected':''}>收入</option></select><input class="l" placeholder="種類" value="${esc(c)}"><input class="a" type="number" inputmode="decimal" placeholder="0" value="${a||''}"><button class="x" data-rm="1">✕</button></div>`;
+function form(el,date){
+ el.dataset.date=date;const items=days[date]||[];let h='';
+ FX.forEach(x=>{
+  if(x.g)h+=`<div class="grp">${x.g}</div>`;
+  const it=items.find(i=>i.c===x.c&&i.t!=='n');
+  h+=`<div class="row${x.s?' r3':''}" data-c="${x.c}" data-t="${x.t||'e'}"><span>${x.c}</span>${x.s?`<input class="l" placeholder="補充" value="${esc(it&&it.l)}">`:''}<input class="a" type="number" inputmode="decimal" placeholder="0" value="${it&&it.a?it.a:''}"></div>`;
+ });
+ h+='<div class="grp">自訂項目</div><div class="exs">';
+ items.filter(i=>i.t!=='n'&&!FN.includes(i.c)).forEach(i=>h+=exRow(i.t,i.c,i.a));
+ const n=items.find(i=>i.t==='n');
+ h+=`</div><button class="plus" data-add="1">+</button><div class="grp">備註</div><div class="row"><span>備註</span><input class="nn" placeholder="文字" value="${esc(n&&n.l)}"></div>`;
+ el.innerHTML=h;
+ let tm;
+ el.oninput=()=>{clearTimeout(tm);tm=setTimeout(()=>commit(el),400)};
+ el.onclick=e=>{
+  if(e.target.dataset.add){el.querySelector('.exs').insertAdjacentHTML('beforeend',exRow('e','',''));}
+  if(e.target.dataset.rm){e.target.closest('.row').remove();commit(el);}
+ };
+}
+function collect(el){
+ const out=[];
+ el.querySelectorAll('.row[data-c]').forEach(r=>{
+  const a=+r.querySelector('.a').value||0,li=r.querySelector('.l'),l=li?li.value.trim():'';
+  if(a||l)out.push({t:r.dataset.t,c:r.dataset.c,l,a});
+ });
+ el.querySelectorAll('.row.ex').forEach(r=>{
+  let c=r.querySelector('.l').value.trim();const a=+r.querySelector('.a').value||0;
+  if(!c&&!a)return;if(!c)c='未分類';if(FN.includes(c))c+='＊';
+  out.push({t:r.querySelector('.t').value,c,l:'',a});
+ });
+ const n=el.querySelector('.nn').value.trim();if(n)out.push({t:'n',c:'備註',l:n,a:0});
+ return out;
+}
+let st;
+function commit(el){
+ const d=el.dataset.date,it=collect(el);
+ if(it.length)days[d]=it;else delete days[d];
+ S('days',days);if(!dirty.includes(d))dirty.push(d);S('dirty',dirty);
+ setStat('待同步');queueSync();
+}
+function queueSync(){clearTimeout(st);st=setTimeout(sync,1500)}
+
+/* ---------- 同步 ---------- */
+let syncing=false;
+const setStat=t=>$('#stat').textContent=t;
+const post=async b=>(await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:cfg.token,...b})})).json();
+async function sync(){
+ if(!cfg.url){setStat('未設定同步');return}
+ if(syncing)return;syncing=true;setStat('同步中…');
+ try{
+  for(const d of [...dirty]){
+   const r=await post({action:'saveDay',date:d,items:days[d]||[]});
+   if(r.error)throw new Error(r.error);
+   dirty=dirty.filter(x=>x!==d);S('dirty',dirty);
+  }
+  if(bDirty){const r=await post({action:'saveBudget',budget});if(r.error)throw new Error(r.error);bDirty=false;S('bDirty',false)}
+  if(wDirty){const r=await post({action:'saveWish',wish});if(r.error)throw new Error(r.error);wDirty=false;S('wDirty',false)}
+  const r=await(await fetch(cfg.url+'?token='+encodeURIComponent(cfg.token))).json();
+  if(r.error)throw new Error(r.error);
+  if(!dirty.length&&!bDirty&&!wDirty){
+   const nd={};r.items.forEach(i=>{(nd[i.d]=nd[i.d]||[]).push({t:i.t,c:i.c,l:i.l,a:+i.a})});
+   days=nd;S('days',days);budget=r.budget||[];S('budget',budget);if(r.wish){wish=r.wish;S('wish',wish)}
+   if(!document.activeElement||!/INPUT|SELECT/.test(document.activeElement.tagName))render();
+  }
+  setStat('已同步');
+ }catch(e){setStat(e.message==='auth'?'密碼錯誤':'離線，待同步')}
+ syncing=false;
+}
+
+/* ---------- 導覽 ---------- */
+const TT={today:'今日記帳',stats:'記帳統計',cal:'過去記錄',edit:'修正記錄',wish:'待買清單',budget:'預算表'};
+let view='today';
+function go(v){
+ view=v;$$('section').forEach(s=>s.hidden=s.id!=='v-'+v);
+ $$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===(v==='edit'?'cal':v)));
+ $('#ttl').textContent=TT[v];render();scrollTo(0,0);
+}
+function render(){
+ if(view==='today'){const t=new Date();$('#todayDate').textContent=`${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}　週${'日一二三四五六'[t.getDay()]}`;form($('#todayForm'),ymd(t))}
+ if(view==='stats')renderStats();
+ if(view==='cal')renderCal();
+ if(view==='wish')renderWish();
+ if(view==='budget')renderBudget();
+}
+$$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(view==='today'&&!(document.activeElement&&document.activeElement.tagName==='INPUT'))render();sync()}});
+
+/* ---------- 統計 ---------- */
+let rk='m';
+function range(k){
+ const n=new Date(),y=n.getFullYear(),m=n.getMonth();let s,e;
+ if(k==='m'){s=new Date(y,m,1);e=new Date(y,m+1,0)}
+ else if(k==='m2'){s=new Date(y,m-1,1);e=new Date(y,m+1,0)}
+ else if(k==='q'){const q=Math.floor(m/3)*3;s=new Date(y,q,1);e=new Date(y,q+3,0)}
+ else if(m>=1&&m<=6){s=new Date(y,1,1);e=new Date(y,7,0)}
+ else{const sy=m===0?y-1:y;s=new Date(sy,7,1);e=new Date(sy+1,1,0)}
+ return[ymd(s),ymd(e)];
+}
+$('#rng').onclick=e=>{const k=e.target.dataset.k;if(!k)return;rk=k;$$('#rng button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));renderStats()};
+function renderStats(){
+ const[s,e]=range(rk),f=flat(),r=f.filter(i=>i.d>=s&&i.d<=e);
+ const inc=sum(r.filter(i=>i.t==='i')),ex=r.filter(i=>i.t==='e'),exp=sum(ex);
+ const by={},rank={};
+ ex.forEach(i=>{by[i.c]=(by[i.c]||0)+i.a;const k=i.l&&(i.c==='其他'||i.c==='特定')?i.c+'·'+i.l:i.c;const o=rank[k]||(rank[k]={n:0,a:0});o.n++;o.a+=i.a});
+ $('#line').innerHTML=line(f);
+ $('#pie').innerHTML=pie(by,inc,exp);
+ const rr=Object.entries(rank).sort((a,b)=>b[1].a-a[1].a);
+ $('#rank').innerHTML=rr.length?`<table><tr><th>#</th><th>種類</th><th>次數</th><th>金額</th></tr>${rr.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x[0])}</td><td>${x[1].n}</td><td>${fmt(x[1].a)}</td></tr>`).join('')}</table>`:'<p class="mut">這段時間沒有支出</p>';
+}
+function line(f){
+ const m={};f.forEach(i=>m[i.d]=(m[i.d]||0)+sg(i));
+ const ds=Object.keys(m).sort();if(!ds.length)return'<p class="mut">還沒有資料</p>';
+ let c=0;const pts=ds.map(d=>[+new Date(d),c+=m[d]]);
+ const W=340,H=170,l=50,r=10,t=12,b=22,x0=pts[0][0],x1=pts[pts.length-1][0];
+ const vs=pts.map(p=>p[1]),lo=Math.min(0,...vs);let hi=Math.max(0,...vs);if(hi===lo)hi=lo+1;
+ const X=v=>x1===x0?(l+W-r)/2:l+(v-x0)/(x1-x0)*(W-l-r),Y=v=>t+(hi-v)/(hi-lo)*(H-t-b);
+ const path=pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('');
+ const lp=pts[pts.length-1];
+ return`<svg class="ch" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ab4ff" stop-opacity=".45"/><stop offset="1" stop-color="#8ab4ff" stop-opacity="0"/></linearGradient></defs>
+<line x1="${l}" x2="${W-r}" y1="${Y(0)}" y2="${Y(0)}" stroke="#ffffff40" stroke-dasharray="3 3"/>
+<path d="${path}L${X(x1)} ${Y(0)}L${X(x0)} ${Y(0)}Z" fill="url(#lg)"/><path d="${path}" fill="none" stroke="#a8c4ff" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="${X(lp[0])}" cy="${Y(lp[1])}" r="3.5" fill="#fff"/>
+<g fill="#9aa3d0" font-size="10"><text x="${l-5}" y="${Y(hi)+4}" text-anchor="end">${fmt(hi)}</text><text x="${l-5}" y="${Y(lo)+4}" text-anchor="end">${fmt(lo)}</text>
+<text x="${l}" y="${H-5}">${ds[0].slice(2)}</text><text x="${W-r}" y="${H-5}" text-anchor="end">${ds[ds.length-1].slice(2)}</text></g></svg>
+<div class="mut" style="text-align:right">目前累計 <b class="${lp[1]>=0?'up':'dn'}">${lp[1]>=0?'+':''}${fmt(lp[1])}</b></div>`;
+}
+function pie(by,inc,exp){
+ const C=2*Math.PI*70,ent=Object.entries(by).sort((a,b)=>b[1]-a[1]);let off=0;
+ let h='<svg class="ch" viewBox="0 0 200 200" style="max-width:260px;margin:auto"><circle cx="100" cy="100" r="70" fill="none" stroke="#ffffff14" stroke-width="26"/>';
+ ent.forEach(([k,v],i)=>{const len=v/exp*C;h+=`<circle cx="100" cy="100" r="70" fill="none" stroke="${PAL[i%PAL.length]}" stroke-width="26" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`;off+=len});
+ const net=inc-exp;
+ h+=`<g text-anchor="middle" font-size="11"><text x="100" y="80" fill="#7be0b0">收入 ${fmt(inc)}</text><text x="100" y="97" fill="#ff8fa3">支出 ${fmt(exp)}</text><text x="100" y="119" fill="#fff" font-size="15" font-weight="600">${net>=0?'+':''}${fmt(net)}</text><text x="100" y="133" fill="#9aa3d0" font-size="10">盈餘</text></g></svg>`;
+ return h+'<div style="margin-top:8px">'+ent.map(([k,v],i)=>`<div class="lg"><i style="background:${PAL[i%PAL.length]}"></i><b>${esc(k)}</b><span>${fmt(v)}</span><span class="mut" style="width:44px;text-align:right">${Math.round(v/exp*100)}%</span></div>`).join('')+'</div>';
+}
+
+/* ---------- 月曆 ---------- */
+let cm=new Date();cm.setDate(1);
+$('#pm').onclick=()=>{cm=new Date(cm.getFullYear(),cm.getMonth()-1,1);renderCal()};
+$('#nm').onclick=()=>{cm=new Date(cm.getFullYear(),cm.getMonth()+1,1);renderCal()};
+function renderCal(){
+ const y=cm.getFullYear(),m=cm.getMonth(),n=new Date(y,m+1,0).getDate(),td=ymd(new Date());
+ $('#cmt').textContent=`${y} 年 ${m+1} 月`;
+ let h='日一二三四五六'.split('').map(x=>`<div>${x}</div>`).join('');
+ for(let i=0;i<cm.getDay();i++)h+='<button class="e"></button>';
+ for(let d=1;d<=n;d++){
+  const k=`${y}-${p2(m+1)}-${p2(d)}`,it=days[k],net=it?it.reduce((s,i)=>s+sg(i),0):0;
+  h+=`<button data-d="${k}" class="${k===td?'t':''}">${d}${it&&net?`<small class="${net>0?'up':'dn'}">${net>0?'+':''}${fmt(net)}</small>`:it?'<small class="mut">•</small>':''}</button>`;
+ }
+ $('#calg').innerHTML=h;
+}
+$('#calg').onclick=e=>{const b=e.target.closest('button');if(!b||!b.dataset.d)return;$('#editTitle').textContent=b.dataset.d;go('edit');form($('#editForm'),b.dataset.d)};
+$('#back').onclick=()=>{commit($('#editForm'));go('cal')};
+
+/* ---------- 待買 ---------- */
+function wSave(){S('wish',wish);wDirty=true;S('wDirty',true);setStat('待同步');queueSync()}
+function renderWish(){
+ $('#wList').innerHTML=wish.length?wish.map(w=>`<label class="card wr" data-id="${esc(w.id)}"><input type="checkbox"><span class="wt">${esc(w.t)}</span>${w.p?`<span class="mut">${fmt(w.p)}</span>`:''}</label>`).join(''):'<p class="mut">清單是空的，想到要買什麼就加進來。勾選後該項會自動刪除。</p>';
+ const tot=wish.reduce((s,w)=>s+(+w.p||0),0);
+ $('#wsum').textContent=wish.length?`共 ${wish.length} 項${tot?`，預估 ${fmt(tot)}`:''}`:'';
+}
+function wAdd(){
+ const t=$('#wn').value.trim();if(!t)return;
+ wish.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t,p:+$('#wp').value||0});
+ $('#wn').value='';$('#wp').value='';wSave();renderWish();
+}
+$('#wa').onclick=wAdd;
+$('#wn').onkeydown=$('#wp').onkeydown=e=>{if(e.key==='Enter')wAdd()};
+$('#wList').onchange=e=>{
+ const el=e.target.closest('.wr');if(!el||!e.target.checked)return;
+ el.style.opacity=.3;el.querySelector('.wt').style.textDecoration='line-through';
+ setTimeout(()=>{wish=wish.filter(w=>w.id!==el.dataset.id);wSave();renderWish()},350);
+};
+
+/* ---------- 預算 ---------- */
+function spent(c){
+ const mo=ymd(new Date()).slice(0,7),f=flat().filter(i=>i.d.startsWith(mo));
+ return c==='盈餘'?f.reduce((s,i)=>s+sg(i),0):sum(f.filter(i=>i.t==='e'&&i.c===c));
+}
+function renderBudget(){
+ $('#bList').innerHTML=budget.map((b,i)=>`<div class="card bi" data-i="${i}"><div class="brow"><input class="bn" list="cats" placeholder="種類" value="${esc(b.c)}"><select class="bm"><option value="max"${b.m!=='min'?' selected':''}>上限</option><option value="min"${b.m==='min'?' selected':''}>至少</option></select><input class="bv a" type="number" inputmode="decimal" placeholder="0" value="${b.v||''}"><button class="x" data-del="${i}">✕</button></div><div class="bar"><i></i></div><div class="bt"></div></div>`).join('');
+ const cs=new Set([...FX.filter(x=>!x.t).map(x=>x.c),'盈餘']);flat().forEach(i=>{if(i.t==='e')cs.add(i.c)});
+ $('#cats').innerHTML=[...cs].map(c=>`<option value="${esc(c)}">`).join('');
+ paint();
+}
+function paint(){
+ let ok=0,bad=0;
+ $$('.bi').forEach(el=>{
+  const b=budget[+el.dataset.i],a=spent(b.c),v=+b.v||0,mx=b.m!=='min';
+  const good=mx?a<=v:a>=v,warn=mx&&good&&v&&a>=v*.8;
+  if(v){good?ok++:mx&&bad++}
+  const col=!good?(mx?'var(--dn)':'var(--wa)'):warn?'var(--wa)':'var(--up)';
+  const bar=el.querySelector('.bar i');bar.style.width=(v?Math.min(a/v,1)*100:0)+'%';bar.style.background=col;
+  el.querySelector('.bt').innerHTML=`<span style="color:${col}">${mx?(good?'未超出':'超出 '+fmt(a-v)):(good?'已達標':'還差 '+fmt(v-a))}</span>　${fmt(a)} / ${fmt(v)}${mx&&good&&v?`　剩 ${fmt(v-a)}`:''}`;
+ });
+ $('#bsum').innerHTML=budget.length?`本月 <b class="up">${ok}</b> 項達標${bad?`，<b class="dn">${bad}</b> 項超出預算`:''}`:'<span class="mut">按下方 + 新增預算，例如「吃飯 上限 3000」。「盈餘」代表本月收入 − 支出，可用「至少」設存錢目標。</span>';
+}
+$('#badd').onclick=()=>{budget.push({c:'',v:0,m:'max'});bSave();renderBudget()};
+$('#bList').oninput=e=>{
+ const el=e.target.closest('.bi');if(!el)return;const b=budget[+el.dataset.i];
+ b.c=el.querySelector('.bn').value.trim();b.m=el.querySelector('.bm').value;b.v=+el.querySelector('.bv').value||0;bSave();paint();
+};
+$('#bList').onclick=e=>{if(e.target.dataset.del!=null){budget.splice(+e.target.dataset.del,1);bSave();renderBudget()}};
+function bSave(){S('budget',budget);bDirty=true;S('bDirty',true);setStat('待同步');queueSync()}
+
+/* ---------- 設定 ---------- */
+$('#gear').onclick=()=>{$('#cu').value=cfg.url;$('#ct').value=cfg.token;$('#set').hidden=false};
+$('#cclose').onclick=()=>$('#set').hidden=true;
+$('#csave').onclick=()=>{cfg={url:$('#cu').value.trim(),token:$('#ct').value};S('cfg',cfg);$('#set').hidden=true;sync()};
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+go('today');
+if(cfg.url)sync();else setStat('未設定同步');
+</script>
+</body>
+</html>
