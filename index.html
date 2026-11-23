@@ -177,26 +177,40 @@ function queueSync(){clearTimeout(st);st=setTimeout(sync,1500)}
 /* ---------- 同步 ---------- */
 let syncing=false;
 const setStat=t=>$('#stat').textContent=t;
-const post=async b=>(await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:cfg.token,...b})})).json();
+const post=async b=>{
+ const body=JSON.stringify({token:cfg.token,...b});
+ try{return await(await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body})).json()}
+ catch(e){await fetch(cfg.url,{method:'POST',mode:'no-cors',body});return{ok:true,unverified:true}}
+};
+const jsonp=u=>new Promise((res,rej)=>{const n='cb'+Date.now(),sc=document.createElement('script');
+ window[n]=d=>{delete window[n];sc.remove();res(d)};sc.onerror=()=>{delete window[n];sc.remove();rej(new Error('jsonp'))};
+ sc.src=u+'&callback='+n;document.head.appendChild(sc);setTimeout(()=>rej(new Error('timeout')),15000)});
+const getAll=async()=>{const u=cfg.url+'?token='+encodeURIComponent(cfg.token);try{return await(await fetch(u)).json()}catch(e){return jsonp(u)}};
 async function sync(){
  if(!cfg.url){setStat('未設定同步');return}
  if(syncing)return;syncing=true;setStat('同步中…');
  try{
+  const un={days:[],b:false,w:false};
   for(const d of [...dirty]){
    const r=await post({action:'saveDay',date:d,items:days[d]||[]});
    if(r.error)throw new Error(r.error);
-   dirty=dirty.filter(x=>x!==d);S('dirty',dirty);
+   if(r.unverified)un.days.push(d);else{dirty=dirty.filter(x=>x!==d);S('dirty',dirty)}
   }
-  if(bDirty){const r=await post({action:'saveBudget',budget});if(r.error)throw new Error(r.error);bDirty=false;S('bDirty',false)}
-  if(wDirty){const r=await post({action:'saveWish',wish});if(r.error)throw new Error(r.error);wDirty=false;S('wDirty',false)}
-  const r=await(await fetch(cfg.url+'?token='+encodeURIComponent(cfg.token))).json();
+  if(bDirty){const r=await post({action:'saveBudget',budget});if(r.error)throw new Error(r.error);if(r.unverified)un.b=true;else{bDirty=false;S('bDirty',false)}}
+  if(wDirty){const r=await post({action:'saveWish',wish});if(r.error)throw new Error(r.error);if(r.unverified)un.w=true;else{wDirty=false;S('wDirty',false)}}
+  const r=await getAll();
   if(r.error)throw new Error(r.error);
+  const key=a=>JSON.stringify(a.map(i=>[i.t,String(i.c),String(i.l||''),+i.a]));
+  const rm={};r.items.forEach(i=>(rm[i.d]=rm[i.d]||[]).push(i));
+  un.days.forEach(d=>{if(key(rm[d]||[])===key(days[d]||[]))dirty=dirty.filter(x=>x!==d)});S('dirty',dirty);
+  if(un.b&&JSON.stringify((r.budget||[]).map(x=>[x.c,+x.v,x.m]))===JSON.stringify(budget.filter(x=>x.c).map(x=>[x.c,+x.v,x.m]))){bDirty=false;S('bDirty',false)}
+  if(un.w&&JSON.stringify((r.wish||[]).map(x=>[x.id,x.t,+x.p]))===JSON.stringify(wish.map(x=>[x.id,x.t,+x.p||0]))){wDirty=false;S('wDirty',false)}
   if(!dirty.length&&!bDirty&&!wDirty){
    const nd={};r.items.forEach(i=>{(nd[i.d]=nd[i.d]||[]).push({t:i.t,c:i.c,l:i.l,a:+i.a})});
    days=nd;S('days',days);budget=r.budget||[];S('budget',budget);if(r.wish){wish=r.wish;S('wish',wish)}
    if(!document.activeElement||!/INPUT|SELECT/.test(document.activeElement.tagName))render();
   }
-  setStat('已同步');
+  setStat(dirty.length||bDirty||wDirty?'待同步':'已同步');
  }catch(e){console.error(e);setStat(e.message==='auth'?'密碼錯誤':'失敗：'+String(e.message||e).slice(0,30))}
  syncing=false;
 }
