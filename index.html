@@ -197,7 +197,7 @@ async function sync(){
    if(!document.activeElement||!/INPUT|SELECT/.test(document.activeElement.tagName))render();
   }
   setStat('已同步');
- }catch(e){setStat(e.message==='auth'?'密碼錯誤':'離線，待同步')}
+ }catch(e){console.error(e);setStat(e.message==='auth'?'密碼錯誤':'失敗：'+String(e.message||e).slice(0,30))}
  syncing=false;
 }
 
